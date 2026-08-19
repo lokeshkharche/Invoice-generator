@@ -1,62 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>MoveWell – Visual Invoice Editor</title>
-<style>
-  :root{--teal:#15A398;--dark:#2B2B2B;--gray:#5F5F5F;--border:#DADADA}
-  *{box-sizing:border-box}
-  body{font-family:'Segoe UI',Arial,sans-serif;background:#e8e8e8;margin:0;padding:70px 0 40px}
-  #toolbar{position:fixed;top:0;left:0;right:0;background:#222;color:#fff;padding:10px 18px;
-           display:flex;gap:10px;align-items:center;z-index:99;font-size:13px}
-  #toolbar button{background:var(--teal);border:none;color:#fff;padding:8px 14px;border-radius:4px;
-                  cursor:pointer;font-weight:bold}
-  #toolbar button.alt{background:#555}
-  .page{width:210mm;min-height:297mm;background:#fff;margin:0 auto;padding:15mm;
-        box-shadow:0 5px 20px rgba(0,0,0,.4)}
-  .card{border:1px solid var(--border);border-radius:3px;box-shadow:2px 3px 7px rgba(0,0,0,.3);
-        padding:26px 30px;height:100%}
-  [contenteditable]{outline:none;border-bottom:1px dashed transparent}
-  [contenteditable]:hover{border-bottom:1px dashed #7cc}
-  [contenteditable]:focus{background:#eefaf9;border-bottom:1px solid var(--teal)}
-  .head{text-align:center}
-  .clinic{font-size:30px;font-weight:800;color:var(--teal)}
-  .sub{color:var(--dark);font-size:13px;margin-top:4px}
-  .rule{height:3px;background:var(--teal);margin:14px 0 20px}
-  .cols{display:flex;justify-content:space-between;font-size:13px;color:var(--dark);line-height:1.7}
-  .cols .right{text-align:right}
-  b{color:#000}
-  table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:22px;color:var(--dark)}
-  th,td{border:1px solid #000;padding:8px 9px;vertical-align:top}
-  th{background:#f2f2f2}
-  .c{text-align:center}.r{text-align:right;font-weight:bold}
-  tr.grand td{background:#e4f5f4}
-  .mini{background:none;border:none;color:var(--teal);cursor:pointer;font-size:11px;padding:2px}
-  .sigwrap{width:42%;margin-left:auto;text-align:center;font-size:13px;color:var(--dark)}
-  .sigwrap img{height:57px;cursor:pointer}
-  .sigline{border-top:1px solid #000;margin:6px 0 4px}
-  .tag{font-style:italic;color:var(--gray);font-size:12.5px;margin-top:26px}
-  @media print{
-    #toolbar,.mini{display:none!important}
-    body{background:#fff;padding:0}
-    .page{box-shadow:none;width:auto;min-height:auto;padding:0}
-  }
-  @page{size:A4;margin:12mm}
-</style>
+  <meta charset="UTF-8">
+  <title>MoveWell – Visual Invoice Editor</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root{--teal:#15A398;--navy:#1B3C8C;--dark:#2B2B2B;--gray:#5F5F5F;--border:#DADADA}
+    *{box-sizing:border-box}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#e8e8e8;margin:0;padding:70px 0 40px}
+    #toolbar{position:fixed;top:0;left:0;right:0;background:#222;color:#fff;padding:10px 18px;
+      display:flex;gap:10px;align-items:center;z-index:99;font-size:13px}
+    #toolbar button{background:var(--teal);border:none;color:#fff;padding:8px 14px;border-radius:4px;
+      cursor:pointer;font-weight:bold}
+    #toolbar button.alt{background:#555}
+    .page{width:210mm;min-height:297mm;background:#fff;margin:0 auto;padding:15mm;
+      box-shadow:0 5px 20px rgba(0,0,0,.4)}
+    .card{border:1px solid var(--border);border-radius:3px;box-shadow:2px 3px 7px rgba(0,0,0,.3);
+      padding:26px 30px;height:100%}
+    [contenteditable]{outline:none;border-bottom:1px dashed transparent}
+    [contenteditable]:hover{border-bottom:1px dashed #7cc}
+    [contenteditable]:focus{background:#eefaf9;border-bottom:1px solid var(--teal)}
+    .head{text-align:center}
+    #logoimg{height:72px;cursor:pointer;margin-bottom:6px}
+    .clinic{font-size:34px;font-weight:800;letter-spacing:3px;text-transform:uppercase;line-height:1.1}
+    .mv{color:var(--navy)}.wl{color:var(--teal)}
+    .physio{letter-spacing:6px;color:var(--navy);font-size:13px;margin-top:3px;font-weight:600}
+    .motto{letter-spacing:3px;color:var(--navy);font-size:10.5px;margin-top:5px}
+    .sub{color:var(--dark);font-size:13px;margin-top:4px}
+    .rule{height:3px;background:var(--teal);margin:14px 0 20px}
+    .cols{display:flex;justify-content:space-between;font-size:13px;color:var(--dark);line-height:1.7}
+    .cols .right{text-align:right}
+    b{color:#000}
+    table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:22px;color:var(--dark)}
+    th,td{border:1px solid #000;padding:8px 9px;vertical-align:top}
+    th{background:#f2f2f2}
+    .c{text-align:center}.r{text-align:right;font-weight:bold}
+    tr.grand td{background:#e4f5f4}
+    .mini{background:none;border:none;color:var(--teal);cursor:pointer;font-size:11px;padding:2px}
+    .sigwrap{width:42%;margin-left:auto;text-align:center;font-size:13px;color:var(--dark)}
+    .sigwrap img{height:57px;cursor:pointer}
+    .sigline{border-top:1px solid #000;margin:6px 0 4px}
+    .tag{font-style:italic;color:var(--gray);font-size:12.5px;margin-top:26px}
+    @media print{
+      #toolbar,.mini{display:none!important}
+      body{background:#fff;padding:0}
+      .page{box-shadow:none;width:auto;min-height:auto;padding:0}
+    }
+    @page{size:A4;margin:12mm}
+  </style>
 </head>
 <body>
 
 <div id="toolbar">
-  ✏️ <b>Click any text on the invoice to edit it</b>
+  ✏️ <b>Click any text to edit</b>
   <span style="flex:1"></span>
-  <button onclick="window.print()">🖨 Print / Save PDF</button>
-  <button class="alt" onclick="exportTex()">⬇ Download .tex</button>
+  <button onclick="downloadPDF()">📥 Download PDF (invoice only)</button>
+  <button class="alt" onclick="window.print()">🖨 Print</button>
+  <button class="alt" onclick="exportTex()">⬇ .tex</button>
 </div>
 
 <div class="page"><div class="card">
 
   <div class="head">
-    <div class="clinic" id="clinicName" contenteditable="true">MoveWell</div>
+    <img id="logoimg" src="movewell_logo.png" alt="Logo (click to upload)" title="Click to upload logo" onclick="logofile.click()">
+    <input type="file" id="logofile" accept="image/*" hidden>
+    <div class="clinic"><span id="nameMove" class="mv" contenteditable="true">Move</span><span id="nameWell" class="wl" contenteditable="true">Well</span></div>
+    <div class="physio">—&nbsp;<span id="physioWord" contenteditable="true">PHYSIOTHERAPY</span>&nbsp;—</div>
+    <div class="motto"><span id="motto" contenteditable="true">HEAL • MOVE • LIVE BETTER</span></div>
     <div class="sub"><span id="clinicWeb" contenteditable="true">Mrunmayeepitale23@gmail.com</span>
       &nbsp;|&nbsp; Ph: <span id="clinicPhone" contenteditable="true">8669969792</span></div>
     <div class="sub" id="clinicAddress" contenteditable="true">Suvarna Park,Bavdhan</div>
@@ -108,7 +119,7 @@
   <div style="height:60px"></div>
 
   <div class="sigwrap">
-    <img id="sigimg" src="1787139977.png" alt="Signature (click to upload)" title="Click to upload signature image" onclick="sigfile.click()">
+    <img id="sigimg" src="1787139977.png" alt="Signature (click to upload)" title="Click to upload signature" onclick="sigfile.click()">
     <input type="file" id="sigfile" accept="image/*" hidden>
     <div class="sigline"></div>
     <span id="signatory" contenteditable="true">Dr Mrunmayee Pitale</span>
@@ -119,32 +130,59 @@
 </div></div>
 
 <script>
-const $=id=>document.getElementById(id);
-const v=id=>$(id).textContent.trim();
-const n=id=>parseFloat(v(id).replace(/[^\d.]/g,''))||0;
+  const $=id=>document.getElementById(id);
+  const v=id=>$(id).textContent.trim();
+  const n=id=>parseFloat(v(id).replace(/[^\d.]/g,''))||0;
 
-function recalc(){
-  const t=n('sessions')*n('rate')*(1-n('disc')/100);
-  $('rowtotal').textContent=t.toFixed(2);
-  $('subtotal').textContent=t.toFixed(2);
-  $('discamt').textContent=(n('sessions')*n('rate')*n('disc')/100).toFixed(2);
-  $('grand').textContent=t.toFixed(2);
-}
-document.addEventListener('input',e=>{if(['sessions','rate','disc'].includes(e.target.id))recalc();});
+  /* ✅ FILE NAME = RECEIPT NO + CUSTOMER NAME  (e.g. INV-819_Mr_Abhinav_Srivastava) */
+  function fileBase(){
+    return (v('invoiceNo')+'_'+v('billedName'))
+            .replace(/\//g,'-')
+            .replace(/[\\:*?"<>|]/g,'')
+            .replace(/\s+/g,'_');
+  }
 
-function addLine(){
-  const d=document.createElement('div');
-  d.className='tline';d.contentEditable=true;d.textContent='-- ';
-  $('treatments').appendChild(d);d.focus();
-}
+  function recalc(){
+    const t=n('sessions')*n('rate')*(1-n('disc')/100);
+    $('rowtotal').textContent=t.toFixed(2);
+    $('subtotal').textContent=t.toFixed(2);
+    $('discamt').textContent=(n('sessions')*n('rate')*n('disc')/100).toFixed(2);
+    $('grand').textContent=t.toFixed(2);
+  }
+  document.addEventListener('input',e=>{if(['sessions','rate','disc'].includes(e.target.id))recalc();});
 
-$('sigfile').onchange=e=>{const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();r.onload=ev=>$('sigimg').src=ev.target.result;r.readAsDataURL(f);};
+  function addLine(){
+    const d=document.createElement('div');
+    d.className='tline';d.contentEditable=true;d.textContent='-- ';
+    $('treatments').appendChild(d);d.focus();
+  }
 
-function exportTex(){
-  const lines=[...document.querySelectorAll('.tline')].map(d=>d.textContent.trim()).filter(t=>t.length>2);
-  const treat="\\textbf{Treatments provided:}\\newline\n"+lines.join("\\newline\n");
-  const tex=String.raw`% !TEX program = xelatex
+  /* Image uploads (logo + signature) */
+  $('logoimg').onerror=()=>$('logoimg').style.visibility='hidden';
+  $('logofile').onchange=e=>{const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();r.onload=ev=>{const i=$('logoimg');i.src=ev.target.result;i.style.visibility='visible';};r.readAsDataURL(f);};
+  $('sigfile').onchange=e=>{const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();r.onload=ev=>$('sigimg').src=ev.target.result;r.readAsDataURL(f);};
+
+  /* DOWNLOAD ONLY THE INVOICE SECTION AS PDF */
+  function downloadPDF(){
+    if(!window.html2canvas){alert('PDF libraries need internet once. Using Print instead.');window.print();return;}
+    const minis=document.querySelectorAll('.mini');minis.forEach(b=>b.style.display='none');
+    html2canvas(document.querySelector('.card'),{scale:2,backgroundColor:'#ffffff'}).then(c=>{
+      minis.forEach(b=>b.style.display='');
+      const {jsPDF}=window.jspdf;
+      const pdf=new jsPDF('p','mm','a4');
+      const w=190,h=c.height*w/c.width;
+      pdf.addImage(c.toDataURL('image/png'),'PNG',10,10,w,Math.min(h,277));
+      pdf.save(fileBase()+'.pdf');   /* ✅ e.g. INV-819_Mr_Abhinav_Srivastava.pdf */
+    });
+  }
+
+  /* EXPORT MATCHING .tex */
+  function exportTex(){
+    const lines=[...document.querySelectorAll('.tline')].map(d=>d.textContent.trim()).filter(t=>t.length>2);
+    const treat="\\textbf{Treatments provided:}\\newline\n"+lines.join("\\newline\n");
+    const tex=String.raw`% !TEX program = xelatex
 \documentclass[11pt]{article}
 \usepackage[a4paper,margin=15mm]{geometry}
 \usepackage[table]{xcolor}
@@ -156,6 +194,7 @@ function exportTex(){
 \pagestyle{empty}
 \setlength{\parindent}{0pt}
 \definecolor{physioteal}{HTML}{15A398}
+\definecolor{movenavy}{HTML}{1B3C8C}
 \definecolor{darktext}{HTML}{2B2B2B}
 \definecolor{graytext}{HTML}{5F5F5F}
 \definecolor{bordergray}{HTML}{DADADA}
@@ -163,7 +202,10 @@ function exportTex(){
 \thispagestyle{empty}
 \begin{tcolorbox}[enhanced,colback=white,colframe=bordergray,boxrule=0.6pt,arc=3pt,drop shadow={black!35},width=\textwidth,left=30pt,right=30pt,top=26pt,bottom=24pt]
 \begin{center}
-{\fontsize{30}{34}\selectfont\bfseries\color{physioteal}${v('clinicName')}}\\[7pt]
+\includegraphics[height=2.6cm,keepaspectratio]{movewell_logo.png}\\[6pt]
+{\fontsize{30}{34}\selectfont\bfseries\textcolor{movenavy}{${v('nameMove')}}\textcolor{physioteal}{${v('nameWell')}}}\\[3pt]
+{\color{movenavy}---\quad{\fontsize{12}{14}\selectfont ${v('physioWord')}}\quad---}\\[3pt]
+{\color{movenavy}\fontsize{9}{11}\selectfont ${v('motto')}}\\[6pt]
 {\color{darktext}${v('clinicWeb')}\quad|\quad Ph: ${v('clinicPhone')}}\\[3pt]
 {\color{darktext}${v('clinicAddress')}}
 \end{center}
@@ -218,11 +260,12 @@ ${v('signatory')}
 {\itshape\color{graytext}Committed to providing the best home physiotherapy service with care.}
 \end{tcolorbox}
 \end{document}`;
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(new Blob([tex],{type:'text/plain'}));
-  a.download=v('invoiceNo').replace(/\//g,'-')+'.tex';a.click();
-}
-recalc();
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([tex],{type:'text/plain'}));
+    a.download=fileBase()+'.tex';   /* ✅ same naming for the .tex file */
+    a.click();
+  }
+  recalc();
 </script>
 </body>
 </html>
